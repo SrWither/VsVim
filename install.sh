@@ -10,6 +10,8 @@ backup() {
 
 update(){
   echo "Updating..."
+  git clone https://github.com/Usuim/Usuim
+  cd Usuim
   sleep 3
   cp *.vim ~/.config/nvim
   mkdir -p ~/.config/nvim/autoload
@@ -23,6 +25,8 @@ update(){
 
 install_usuim() {
   echo "Installing configuration..."
+  git clone https://github.com/Usuim/Usuim
+  cd Usuim
   LCLDIR="$HOME/.local/bin"
   if [[ ! -d $LCLDIR ]]; then
     mkdir -p ~/.local/bin
