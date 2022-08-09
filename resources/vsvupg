@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+VersionActual='1.6.5'
+repositorio="VsVim"
+usuario="SrWither"
+scripts="install.sh"
+
+
+getConfiguredClient()
+{
+  if  command -v curl &>/dev/null; then
+    configuredClient="curl"
+  elif command -v wget &>/dev/null; then
+    configuredClient="wget"
+  elif command -v http &>/dev/null; then
+    configuredClient="httpie"
+  elif command -v fetch &>/dev/null; then
+    configuredClient="fetch"
+  else
+    echo "Error: You need curl, wget, httpie o fetch installed\." >&2
+    return 1
+  fi
+}
+
+httpGet()
+{
+  case "$configuredClient" in
+    curl)  curl -A curl -s "$@" ;;
+    wget)  wget -qO- "$@" ;;
+    httpie) http -b GET "$@" ;;
+    fetch) fetch -q "$@" ;;
+  esac
+}
+
+update()
+{
+if [[ $VersionActual == "" || $repositorio == "" || $usuario == "" || $scripts == ""  || $UltimaVersion == "" ]];then
+  echo "Error: Not configured correctly." >&2
+  return 1
+else
+  if [[ "$UltimaVersion" != "$VersionActual" ]]; then
+    echo "Version $UltimaVersion available"
+    echo -n "Do you want to update $repositorio? [Y/n]: "
+    read -r answer
+    if [[ "$answer" == "Y" || "$answer" == "y" ]] ;then
+      cd  ~ || { echo 'Actualizacion fallida' ; return 1 ; }
+      if [[ -d  ~/$repositorio ]]; then rm -r -f $repositorio  || { echo "Error: Permission denied, try to run with sudo or doas" ; return 1 ; }; fi
+      git clone "https://github.com/$usuario/$repositorio" || { echo "Couldn't download the latest version" ; return 1; }
+      cd $repositorio ||  { echo 'Update Failed' ; return 1 ;}
+      git checkout "v$UltimaVersion" 2> /dev/null || git checkout "$UltimaVersion" 2> /dev/null || echo "Couldn't run git checkout for stable version, updating with last commit!."
+
+      chmod +x $scripts
+      "./$scripts" || return 1
+      cd ..
+
+      # Sed in diferent O.S
+
+      if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            sed -i "2s/.*/VersionActual='$UltimaVersion'/" ~/.local/bin/vsvupg
+            sed -i "2s/.*/VersionActual='$UltimaVersion'/" ~/.local/bin/checkupg
+      elif [[ "$OSTYPE" == "freebsd"* ]]; then
+            gsed -i "2s/.*/VersionActual='$UltimaVersion'/" ~/.local/bin/vsvupg
+            gsed -i "2s/.*/VersionActual='$UltimaVersion'/" ~/.local/bin/checkupg
+      else
+            sed -i "2s/.*/VersionActual='$UltimaVersion'/" ~/.local/bin/vsvupg
+            sed -i "2s/.*/VersionActual='$UltimaVersion'/" ~/.local/bin/checkupg
+      fi
+
+      rm -r -f $repositorio || { echo "Error: Successful update but couldn't delete temporary files: ~/$repositorio"; return 1; }
+    else
+      return 1
+    fi
+  else
+    echo "$repositorio is updated: Version $VersionActual"
+  fi
+fi
+}
+
+checkInternet()
+{
+  httpGet google.com > /dev/null 2>&1 || { echo "Error: There isn't Internet connection" >&2; return 1; } # query google with a get request
+}
+
+
+getConfiguredClient || exit 1
+checkInternet || exit 1
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    UltimaVersion=$(httpGet https://api.github.com/repos/$usuario/$repositorio/tags | grep -Eo '"name":.*?[^\\]",'| head -1 | grep -Eo "[0-9.]+" )
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    UltimaVersion=$(httpGet https://api.github.com/repos/$usuario/$repositorio/tags | /usr/local/bin/grep -Eo '"name":.*?[^\\]",'| head -1 | /usr/local/bin/grep -Eo "[0-9.]+" )
+elif [[ "$OSTYPE" == "FreeBSD" ]]; then
+    UltimaVersion=$(httpGet https://api.github.com/repos/$usuario/$repositorio/tags | /usr/local/bin/grep -Eo '"name":.*?[^\\]",'| head -1 | /usr/local/bin/grep -Eo "[0-9.]+" )
+else
+    UltimaVersion=$(httpGet https://api.github.com/repos/$usuario/$repositorio/tags | grep -Eo '"name":.*?[^\\]",'| head -1 | grep -Eo "[0-9.]+" )
+fi
+
+update || exit 1

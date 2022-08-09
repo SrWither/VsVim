@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+VersionActual='1.6.5'
+
+getConfiguredClient()
+{
+  if  command -v curl &>/dev/null; then
+    configuredClient="curl"
+  elif command -v wget &>/dev/null; then
+    configuredClient="wget"
+  elif command -v http &>/dev/null; then
+    configuredClient="httpie"
+  elif command -v fetch &>/dev/null; then
+    configuredClient="fetch"
+  else
+    echo "Error: You need curl, wget, httpie o fetch installed\." >&2
+    return 1
+  fi
+}
+
+httpGet()
+{
+  case "$configuredClient" in
+    curl)  curl -A curl -s "$@" ;;
+    wget)  wget -qO- "$@" ;;
+    httpie) http -b GET "$@" ;;
+    fetch) fetch -q "$@" ;;
+  esac
+}
+
+checkInternet()
+{
+  httpGet google.com > /dev/null 2>&1 || { echo "Error: There isn't Internet conection" >&2; return 1; }
+}
+
+getConfiguredClient || exit 1
+checkInternet || exit 1
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    UltimaVersion=$(httpGet https://api.github.com/repos/SrWither/VsVim/tags | grep -Eo '"name":.*?[^\\]",'| head -1 | grep -Eo "[0-9.]+" )
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    UltimaVersion=$(httpGet https://api.github.com/repos/SrWither/VsVim/tags | /usr/local/bin/grep -Eo '"name":.*?[^\\]",'| head -1 | /usr/local/bin/grep -Eo "[0-9.]+" )
+elif [[ "$OSTYPE" == "FreeBSD" ]]; then
+    UltimaVersion=$(httpGet https://api.github.com/repos/SrWither/VsVim/tags | /usr/local/bin/grep -Eo '"name":.*?[^\\]",'| head -1 | /usr/local/bin/grep -Eo "[0-9.]+" )
+else
+    UltimaVersion=$(httpGet https://api.github.com/repos/SrWither/VsVim/tags | grep -Eo '"name":.*?[^\\]",'| head -1 | grep -Eo "[0-9.]+" )
+fi
+
+if [[ "$UltimaVersion" != "$VersionActual" ]]; then
+  echo "VsVim '$UltimaVersion' available, Update with 'vsvupg'"
+  # ~/.local/bin/vsvupg # Update neovim when opening terminal
+fi
