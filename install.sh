@@ -21,6 +21,7 @@ update(){
   ExternalConfig
   nvim -c ":PlugClean | :PlugUpdate | :qa!"
   echo "Successful upgrade!"
+  rm ~/.config/nvim/.IDVSVIM
 }
 
 install_usuim() {
