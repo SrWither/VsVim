@@ -46,7 +46,7 @@ install_usuim() {
 CheckExistConfig() {
 
   DIRECTORY="$HOME/.config/nvim"
-  ID="$HOME/.config/nvim/.IDUSUIM"
+  ID="$HOME/.config/nvim/.IDVSVIM"
 
   if [[ ! -f $ID ]]; then
     if [[ ! -d $DIRECTORY ]]; then
