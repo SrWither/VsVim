@@ -14,6 +14,7 @@ update(){
   cd Usuim
   sleep 3
   cp *.vim ~/.config/nvim
+  cp .IDUSUIM ~/.config/nvim
   mkdir -p ~/.config/nvim/autoload
   cp autoload/*.vim ~/.config/nvim/autoload
   cp resources/* ~/.local/bin
