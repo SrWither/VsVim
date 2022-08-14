@@ -18,8 +18,10 @@
 | F2 | Toggle Filetree |
 | F3 | Open Dashboard |
 | Ctrl + F12 | Go to definition |
-| Tab/Down | Go down in the autocomplete |
-| Shift + Tab/Up | Go up in the autocomplete |
+| Tab/Down/ScrollDown | Go down in the autocomplete |
+| Shift + Tab/Up/ScrollUp | Go up in the autocomplete |
+| Ctrl + ScrollUp | Go up in the autocomplete documentation |
+| Ctrl + ScrollDown | Go down in the autocomplete documentation |
 
 ## :evergreen_tree: Filetree Shortcuts
 | Shortcuts  | Action |
