@@ -14,6 +14,7 @@
 | Ctrl + T | Toggle Terminal |
 | Ctrl + 7 | Comment Code |
 | Ctrl + B | Search files |
+| Ctrl + R | Rename definitions |
 | Ctrl + Space | Open code completion |
 | F2 | Toggle Filetree |
 | F3 | Open Dashboard |
